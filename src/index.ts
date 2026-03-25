@@ -5,6 +5,10 @@ import { authMiddleware } from './middleware/auth'
 import collectRoute from './routes/collect'
 import itemsRoute from './routes/items'
 import healthRoute from './routes/health'
+import digestRoute from './routes/digest'
+import { extractContent } from './services/extractor'
+import { runDigestPipeline } from './services/pipeline'
+import { getPendingRetryItems } from './db/queries'
 
 const app = new Hono<{ Bindings: Env }>()
 
@@ -18,6 +22,7 @@ app.route('/api/health', healthRoute)
 app.use('/api/*', authMiddleware)
 app.route('/api/collect', collectRoute)
 app.route('/api/items', itemsRoute)
+app.route('/api/digest', digestRoute)
 
 // 404 兜底
 app.notFound((c) => c.json({ ok: false, error: 'not_found' }, 404))
@@ -28,11 +33,30 @@ app.onError((err, c) => {
   return c.json({ ok: false, error: 'internal_server_error' }, 500)
 })
 
-// Cron 触发器（后续 Phase 5 填充逻辑）
+// Cron 触发器（每日 00:00 UTC = 08:00 CST）
 export default {
   fetch: app.fetch,
-  async scheduled(_event: ScheduledEvent, _env: Env, _ctx: ExecutionContext) {
-    console.log(JSON.stringify({ event: 'cron_triggered', time: new Date().toISOString() }))
-    // TODO: Phase 5 — 重试提取 + 批量总结 + 飞书推送
+  async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
+    const startTime = new Date().toISOString()
+    console.log(JSON.stringify({ event: 'cron_start', time: startTime }))
+
+    // Step 1：重试 pending / failed 的提取任务
+    try {
+      const retryItems = await getPendingRetryItems(env.DB)
+      for (const item of retryItems) {
+        ctx.waitUntil(extractContent(env, item.id, item.url))
+      }
+      console.log(JSON.stringify({ event: 'cron_retry_queued', count: retryItems.length }))
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      console.error(JSON.stringify({ event: 'cron_retry_error', error: msg }))
+    }
+
+    // Step 2：对已提取的 items 进行总结并推送飞书
+    ctx.waitUntil(
+      runDigestPipeline(env).then(result => {
+        console.log(JSON.stringify({ event: 'cron_pipeline_done', ...result }))
+      }),
+    )
   },
 }
