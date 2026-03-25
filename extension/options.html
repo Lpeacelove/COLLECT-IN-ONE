@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Collect In One 设置</title>
+  <style>
+    body {
+      width: 400px;
+      padding: 24px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 14px;
+    }
+    h1 {
+      font-size: 18px;
+      margin: 0 0 20px;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    #saveBtn {
+      padding: 8px 24px;
+      background: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    #status {
+      display: none;
+      margin-top: 8px;
+      padding: 6px 8px;
+      border-radius: 4px;
+      background: #e6f4ea;
+      color: #1e7e34;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <h1>设置</h1>
+  <div class="form-group">
+    <label for="workerUrl">Worker URL</label>
+    <input type="text" id="workerUrl" placeholder="https://your-worker.workers.dev" />
+  </div>
+  <div class="form-group">
+    <label for="apiKey">API Key</label>
+    <input type="password" id="apiKey" placeholder="Bearer token" />
+  </div>
+  <button id="saveBtn">保存</button>
+  <div id="status"></div>
+  <script src="options.js"></script>
+</body>
+</html>
