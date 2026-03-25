@@ -65,3 +65,15 @@ export interface ApiResponse<T = unknown> {
   data?: T
   error?: string
 }
+
+export interface DigestPayload {
+  id: string
+  overall: string
+  date: string
+  items: Array<{
+    id: string
+    title: string
+    url: string
+    summary: string
+  }>
+}

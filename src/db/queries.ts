@@ -127,6 +127,39 @@ export async function getSummarizedItems(db: D1Database): Promise<Item[]> {
   return result.results ?? []
 }
 
+// 插入 digest 汇总记录
+export async function insertDigest(
+  db: D1Database,
+  digest: {
+    id: string
+    summary_overview: string
+    item_count: number
+    period_start: string
+    period_end: string
+  }
+): Promise<void> {
+  await db
+    .prepare(
+      `INSERT INTO digests (id, summary_overview, item_count, period_start, period_end)
+       VALUES (?, ?, ?, ?, ?)`
+    )
+    .bind(digest.id, digest.summary_overview, digest.item_count, digest.period_start, digest.period_end)
+    .run()
+}
+
+// 批量插入 digest_items 关联
+export async function insertDigestItems(
+  db: D1Database,
+  items: Array<{ digest_id: string; item_id: string; display_order: number }>
+): Promise<void> {
+  for (const item of items) {
+    await db
+      .prepare('INSERT INTO digest_items (digest_id, item_id, display_order) VALUES (?, ?, ?)')
+      .bind(item.digest_id, item.item_id, item.display_order)
+      .run()
+  }
+}
+
 // 批量更新状态
 export async function batchUpdateStatus(
   db: D1Database,
