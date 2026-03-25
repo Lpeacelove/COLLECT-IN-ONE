@@ -26,6 +26,7 @@ export async function extractContent(env: Env, itemId: string, url: string): Pro
 
     if (res.status === 404 || res.status === 403) {
       // 无法访问的页面，不再重试
+      clearTimeout(timer)
       await updateItemStatus(env.DB, itemId, 'permanently_failed', {
         last_error: `HTTP ${res.status} from Jina`,
       })
