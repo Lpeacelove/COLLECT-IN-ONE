@@ -1,0 +1,12 @@
+name = "collect-in-one"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+[triggers]
+crons = ["0 0 * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "collect-in-one-db"
+database_id = "a66bc8a1-2496-4aac-8748-305250ea839b"
